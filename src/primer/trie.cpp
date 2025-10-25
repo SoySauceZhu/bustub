@@ -13,6 +13,7 @@
 #include "primer/trie.h"
 #include <string_view>
 #include "common/exception.h"
+#include "fmt/chrono.h"
 
 namespace bustub {
 
@@ -24,12 +25,35 @@ namespace bustub {
  */
 template <class T>
 auto Trie::Get(std::string_view key) const -> const T * {
-  throw NotImplementedException("Trie::Get is not implemented.");
-
   // You should walk through the trie to find the node corresponding to the key. If the node doesn't exist, return
   // nullptr. After you find the node, you should use `dynamic_cast` to cast it to `const TrieNodeWithValue<T> *`. If
   // dynamic_cast returns `nullptr`, it means the type of the value is mismatched, and you should return nullptr.
   // Otherwise, return the value.
+
+  std::shared_ptr<const TrieNode> current = root_;
+  for (char c : key) {
+    if (current == nullptr) {
+      return nullptr;
+    }
+
+    auto it = current->children_.find(c);
+    if (it == current->children_.end()) {
+      return nullptr;
+    } else {
+      current = it->second;
+    }
+  }
+
+  if (current == nullptr) {
+    return nullptr;
+  }
+
+  std::shared_ptr<const TrieNodeWithValue<T>> leaf_node =
+      std::dynamic_pointer_cast<const TrieNodeWithValue<T>>(current);
+  if (leaf_node == nullptr) {
+    return nullptr;
+  }
+  return leaf_node->value_.get();
 }
 
 /**
@@ -43,6 +67,65 @@ auto Trie::Put(std::string_view key, T value) const -> Trie {
 
   // You should walk through the trie and create new nodes if necessary. If the node corresponding to the key already
   // exists, you should create a new `TrieNodeWithValue`.
+
+  // auto value_ptr = std::make_shared<T>(std::move(value));
+  //
+  // if (key.empty()) {
+  //   std::map<char, std::shared_ptr<const TrieNode>> new_children;
+  //
+  //   if (root_ != nullptr) {
+  //     new_children = root_->children_;
+  //   }
+  //
+  //   auto new_root = std::make_shared<TrieNodeWithValue<T>>(std::move(new_children), std::move(value_ptr));
+  //
+  //   return Trie(std::move(new_root));
+  // }
+  //
+  // std::function<std::shared_ptr<const TrieNode>(std::shared_ptr<const TrieNode>, size_t)> put_helper;
+  //
+  //
+  //
+  // put_helper = [&](std::shared_ptr<const TrieNode> node, size_t idx) -> std::shared_ptr<const TrieNode> {
+  //   // usage: put_helper(root, len(char))
+  //   // `[&]` allow the function to access outer domain variable
+  //   char c = key[idx];
+  //
+  //   if (idx == key.size() - 1) {
+  //     // if (node == nullptr) {
+  //     // return std::make_shared<TrieNodeWithValue<T>>(std::move(value_ptr));
+  //     // }
+  //     std::map<char, std::shared_ptr<const TrieNode>> new_children;
+  //
+  //     if (node != nullptr) {
+  //       new_children = node->children_;
+  //     }
+  //     new_children[c] = std::make_shared<TrieNodeWithValue<T>>(std::move(value_ptr));
+  //     if (node == nullptr) {
+  //       return std::make_shared<TrieNode>(std::move(new_children));
+  //     } else {
+  //       auto new_node = node->Clone();
+  //       new_node->children_ = std::move(new_children);
+  //       return new_node;
+  //     }
+  //   }
+  //
+  //   std::shared_ptr<const TrieNode> child_node;
+  //   if (node == nullptr) {
+  //     child_node = nullptr;
+  //   } else {
+  //     auto it = node->children_.find(c);
+  //     child_node = it->second;
+  //   }
+  //
+  //   auto new_child = put_helper(child_node, idx + 1);
+  //
+  // }
+  //
+
+
+
+
 }
 
 /**
